@@ -1,0 +1,4 @@
+- insert:
+    - id: apply-plugin-updates
+      name: dsh-bundle-apply-updates
+      inject: [webServer, connection, agents, profileContext]
