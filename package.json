@@ -1,6 +1,6 @@
 {
   "name": "dsh-bundle-apply-updates",
-  "version": "0.1.0",
+  "version": "0.1.2",
   "private": true,
   "description": "Apply installed DSH plugin updates through a supervised, idle-only host restart.",
   "displayName": "应用插件更新",

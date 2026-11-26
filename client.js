@@ -9,6 +9,10 @@ window.__ModuleLoader__.load({
         method, credentials: 'same-origin', cache: 'no-store', signal,
         headers: boot ? { 'X-DSH-Apply-Generation': boot } : {},
       })
+      if (!response.headers.get('content-type')?.includes('application/json')) {
+        if (response.status === 401 || response.status === 403) throw new Error('请从本机 DSH 登录入口重新打开设置。')
+        throw new Error('重启服务接口不可用（HTTP ' + response.status + '）。请检查插件已在 Web profile 启用。')
+      }
       const result = await response.json()
       if (!response.ok) throw new Error(result.error || '无法读取服务状态')
       return result
@@ -71,13 +75,20 @@ window.__ModuleLoader__.load({
       }
       return h('section', { style: { maxWidth: '42rem', padding: '1rem', display: 'grid', gap: '0.8rem' } },
         h('h2', null, '应用插件更新'),
-        h('p', null, '安装或更新插件后，重新启动 DSH 以加载已安装的版本。'),
+        h('p', null, '当插件管理器提示“需要重启”时使用。已生效的更新可以直接使用。'),
         h('button', { type: 'button', disabled: waiting || !state.boot || !!state.blocker, onClick: restart, style: { justifySelf: 'start' } }, '重启服务并应用更新'),
-        h('p', { role: 'status' }, message || state.blocker || '服务空闲，可以重启。'))
+        h('p', { role: 'status' }, message || state.blocker || '服务空闲，可以重启。'),
+        h('details', null,
+          h('summary', null, '首次设置与按钮不可用的原因'),
+          h('p', null, '先在 Docker Compose 中确认此 DSH 服务的 restart 为 unless-stopped 或 always，并使该策略生效。'),
+          h('p', null, '在当前 Web profile 的 cordis.patch.yml 中合并下面的配置，再用原服务管理器重启一次。'),
+          h('pre', null, '- id: apply-plugin-updates\n  config:\n    supervised: true'),
+          h('p', null, '在运行容器的电脑上通过 localhost 登录 DSH。会话、QQ 队列或插件安装仍在运行时，请等任务结束，状态会自动刷新。')))
     }
     return {
       name: 'dsh-bundle-apply-updates', inject: ['slots'],
       apply(ctx) {
+        if (window.location.protocol === 'dsh-app:') return
         ctx.effect(() => ctx.slots.inject('settings.section', () => ctx.slots.register({
           name: 'settings.section', id: 'apply-plugin-updates', order: 49, label: () => '应用插件更新',
           inject: () => ({}),

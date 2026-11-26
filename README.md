@@ -9,7 +9,7 @@
 1. 在运行 DSH 的环境中将插件安装到 Web profile。支持 URL 安装的插件管理器也可以使用同一个安装包地址。
 
    ```sh
-   dsh plugin --profile web add --ignore-scripts https://github.com/compilink/dsh-apply-updates-plugin/releases/download/v0.1.0/dsh-bundle-apply-updates.tgz
+   dsh plugin --profile web add --ignore-scripts https://github.com/compilink/dsh-apply-updates-plugin/releases/download/v0.1.2/dsh-bundle-apply-updates.tgz
    ```
 
 2. 在 Web profile 的 `cordis.patch.yml` 中添加以下配置，保留已有配置项。
@@ -22,7 +22,7 @@
 
 3. 等 DSH 空闲后，通过现有服务管理器重启一次。用本机浏览器登录，打开 **设置 → 应用插件更新**。页面显示「服务空闲，可以重启。」表示按钮可用。
 
-发布页提供固定版本的安装包和 SHA-256 校验文件。[v0.1.0 Release](https://github.com/compilink/dsh-apply-updates-plugin/releases/tag/v0.1.0)
+发布页提供固定版本的安装包和 SHA-256 校验文件。[v0.1.2 Release](https://github.com/compilink/dsh-apply-updates-plugin/releases/tag/v0.1.2)
 
 ## 让插件更新生效
 
@@ -35,7 +35,7 @@
 ## 运行条件与通道接入
 
 - Web profile 需要提供 `webServer`、`connection`、`agents` 和 `profileContext`，DSH 进程需有 `SIGTERM` 退出处理器。`supervised` 默认为关闭。停用管理器的自动重启前，请先将其改为 `false` 并加载配置。
-- 重启请求只接受已登录的本机浏览器同源操作，并绑定当前服务的启动标识。如果本机直接登录后仍报身份错误，请核对部署的浏览器认证接口是否兼容 v0.1.0 使用的 `connection.browserPeer`。
+- 重启请求只接受已登录的本机浏览器同源操作，并绑定当前服务的启动标识。通过局域网地址或反向代理访问、登录过期、后台任务忙碌、未配置自动重启都可能使按钮置灰。面板会显示当前原因和首次配置步骤。
 - 通道插件可监听同步事件 `apply-updates/check-idle`。监听器收到 `{ block(reason) }`，在队列或收发任务仍活跃时调用 `block`。QQ 通道通过此事件报告各实例的忙碌状态。
 - 插件只向自己的 DSH 进程发送退出信号。容器可以继续使用现有权限，无需挂载 Docker socket。
 
@@ -44,3 +44,5 @@
 ```sh
 npm test
 ```
+
+Web 设置按 DSH 已验证的浏览器身份控制重启。官方桌面客户端不注册重启按钮或重启接口。
